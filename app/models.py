@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 
@@ -8,7 +10,7 @@ class Task(models.Model):
     """
     Таблица задач.
     """
-    id = fields.UUIDField(pk=True)
+    id = fields.UUIDField(pk=True, default=uuid4)
     name = fields.CharField(max_length=100)
     description = fields.TextField(null=True)
     status = fields.CharEnumField(TaskStatus, default=TaskStatus.CREATED)
