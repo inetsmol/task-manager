@@ -1,0 +1,25 @@
+# Dockerfile.tests
+FROM python:3.12-slim
+
+WORKDIR /project
+
+# --- Установка Gauge CLI и python-плагина для Gauge ---
+# Gauge CLI нужен для запуска .spec; python-плагин — связка с getgauge (pip пакет шагов)
+RUN apt-get update && apt-get install -y --no-install-recommends curl unzip ca-certificates \
+    && curl -SsL https://downloads.gauge.org/stable | sh \
+    && gauge install python \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Python-зависимости (включая getgauge) ---
+COPY requirements.txt /project/
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# --- Копируем код приложения и спеки/шаги ---
+COPY app /project/app
+COPY specs /project/specs
+COPY step_impl /project/step_impl
+COPY env /project/env
+COPY manifest.json /project/manifest.json
+
+# --- Запуск Gauge-спеков; html-отчёт будет в ./reports ---
+CMD ["gauge", "run", "specs"]
